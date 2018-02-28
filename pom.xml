@@ -16,7 +16,7 @@
     <version>1.5.10.RELEASE</version>  
   </parent>
   
-<!-- <dependencyManagement>
+<dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.keycloak.bom</groupId>
@@ -26,7 +26,7 @@
             <scope>import</scope>
         </dependency>
     </dependencies>
-</dependencyManagement>  --> 
+</dependencyManagement>  
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,6 +39,11 @@
  		<artifactId>spring-boot-starter-web</artifactId>
  	</dependency>
  	
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-security</artifactId>
+	</dependency> 	
+ 	
  	<dependency>
  		<groupId>org.springframework.boot</groupId>
  		<artifactId>spring-boot-starter-logging</artifactId>
@@ -50,10 +55,10 @@
       <scope>test</scope>
     </dependency>
     
-<!-- 	<dependency>
+	<dependency>
 	    <groupId>org.keycloak</groupId>
 	    <artifactId>keycloak-spring-boot-starter</artifactId>
-	</dependency>   -->  
+	</dependency>    
   </dependencies>
   <build>
   	<plugins>
