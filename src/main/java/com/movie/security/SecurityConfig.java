@@ -59,6 +59,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter{
       super.configure(http);
           
       http	
+      		.csrf()
+      		.disable()
       		.authorizeRequests() 
 /*      		.antMatchers("/movie/list/*").hasRole("corvesta-user")*/
             .antMatchers("/movie/*").hasRole("corvesta-admin")           
