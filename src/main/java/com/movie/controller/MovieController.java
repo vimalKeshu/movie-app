@@ -23,8 +23,9 @@ public class MovieController {
 	private MovieService movieService;
 	
 	@RequestMapping(method=RequestMethod.GET,value="/list")
-	@PreAuthorize("hasRole('corvesta-user')")
+	@PreAuthorize("hasRole('ROLE_USER')")
 	public List<Movie> getAll(){
+		LOGGER.info("...................................inside rest end point..........................");
 		return movieService.getAll();
 	}
 	

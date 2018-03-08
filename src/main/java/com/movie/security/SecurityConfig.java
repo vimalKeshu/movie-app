@@ -1,79 +1,108 @@
 package com.movie.security;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.Filter;
 
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
-import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
-import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
-import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
-import org.keycloak.adapters.springsecurity.filter.KeycloakPreAuthActionsFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.authority.mapping.SimpleAuthorityMapper;
-import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+
 
 @Configuration
-@EnableWebSecurity
-@ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
+@EnableWebSecurity	
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter{
+public class SecurityConfig extends WebSecurityConfigurerAdapter{
+	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
+    
+	 public SecurityConfig() {
+	        super(true);
+	    }	
 	
-   /**
-    * Registers the KeycloakAuthenticationProvider with the authentication manager.
-    */
-   @Autowired
-   public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-      KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
-      keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
-      auth.authenticationProvider(keycloakAuthenticationProvider);
-   }
-   
-   /**
-    * Sets keycloaks config resolver to use springs application.properties instead of keycloak.json (which is standard)
-    * @return
-    */
-   @Bean
-   public KeycloakSpringBootConfigResolver KeycloakConfigResolver() {
-      return new KeycloakSpringBootConfigResolver();
-   }   
-   
-   /**
-    * Defines the session authentication strategy.
-    */   
-	@Bean
 	@Override
-	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-		return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
+	protected void configure(HttpSecurity http) throws Exception {
+	
+        http
+        .csrf()
+        .disable()      
+        .addFilterAfter(registration().getFilter(), UsernamePasswordAuthenticationFilter.class)
+        .authorizeRequests()                       
+        .antMatchers("/movie/**")
+        .authenticated()
+        ;
 	}
-
-   @Override
-   protected void configure(HttpSecurity http) throws Exception
-   {
-      super.configure(http);
-          
-      http	
-      		.csrf()
-      		.disable()
-      		.authorizeRequests() 
-            .antMatchers("/movie/**").authenticated();
-   }	
-   
-   @Bean
-   public FilterRegistrationBean keycloakPreAuthActionsFilterRegistrationBean(
-           KeycloakPreAuthActionsFilter filter) {
-       FilterRegistrationBean registrationBean = new FilterRegistrationBean(filter);
-       registrationBean.setEnabled(false);
-       return registrationBean;
-   }   
 	
+    @Bean
+    public KeycloakAuthenticationFilter getKeycloakAuthenticationFilter() {
+        final KeycloakAuthenticationFilter filter = new KeycloakAuthenticationFilter(); 
+        return filter;
+    }
+    
+/*    @Bean
+    public KeycloakAuthorizationFilter getKeycloakAuthorizationFilter() {
+        final KeycloakAuthorizationFilter filter = new KeycloakAuthorizationFilter(new NoOpAuthenticationManager());
+        return filter;
+    }  */  
 	
+    @Bean
+    public FilterRegistrationBean<Filter> registration() {
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<Filter>();
+        registration.setFilter(getKeycloakAuthenticationFilter());
+        registration.setEnabled(false);        
+        return registration;
+    }	
+	
+/*    *//**
+     * This repository contains all known client registrations. This is only one-
+     * Fan-out to different clients is done by Keycloak if necessary.
+     *
+     * @param clientProperties
+     * @return
+     *//*
+    @Bean
+    public ClientRegistrationRepository clientRegistrationRepository() {
+        return new InMemoryClientRegistrationRepository(this.asClientRegistration());
+    }
+    
+	*//**
+     * And this is the only interesting part here. The keycloak realm
+     * is transformed to a so called ClientRegistration. ClientRegistrations
+     * are used by Spring Security 5 to define different OAuth providers
+     * @return
+     *//*
+    public ClientRegistration asClientRegistration() {
+    	
+    	String realm = "SpringBootKeycloak";
+    	String serverUrl="http://localhost:8180/auth";
+    	String id="movie-app";
+    	String name="movie-app";
+    	String secret="4e814fef-5b01-4491-a308-2ac7a55660ae";
+    	String scope1="openid";
+    	String scope2="profile";
+        final String openIdConnectBaseUri
+            = serverUrl + "/realms/" + realm + "/protocol/openid-connect";
+        
+        return ClientRegistration.withRegistrationId(realm)
+            .clientId(id)
+            .clientSecret(secret)
+            .clientName(name)
+            .clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .redirectUriTemplate("{baseUrl}/login/oauth2/code/{registrationId}")
+            .scope(scope1,scope2)
+            .authorizationUri(openIdConnectBaseUri + "/auth")
+            .tokenUri(openIdConnectBaseUri + "/token")
+            .jwkSetUri(openIdConnectBaseUri + "/certs")
+            .userInfoUri(openIdConnectBaseUri + "/userinfo")
+            .userNameAttributeName("preferred_username")
+            .build();
+    }    
+    */
+			
 }
