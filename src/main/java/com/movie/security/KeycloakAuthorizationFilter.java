@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedClientException;
 import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -71,25 +73,33 @@ public class KeycloakAuthorizationFilter extends BasicAuthenticationFilter{
                                     FilterChain chain) throws IOException, ServletException {
 
 		BearerTokenExtractor bearerTokenExtractor = new BearerTokenExtractor();
-		Authentication auth = bearerTokenExtractor.extract(req);
-		String strAccessToken  = auth.getName();
-		LOGGER.info("Token ................. "+strAccessToken); 
-        if (strAccessToken == null || strAccessToken.isEmpty()) {
+		Authentication auth = bearerTokenExtractor.extract(req);	 
+        if (auth == null || auth.getName().isEmpty()) {
         	LOGGER.info("There is problem with token...............");
             chain.doFilter(req, res);
             return;
         }
+        try {
+        	String strAccessToken  = auth.getName();
+    		LOGGER.info("Token ................. "+strAccessToken);
+    		Jwt tokenDecoded = JwtHelper.decode(strAccessToken);
+    		Map<Object, Object> authInfo = new ObjectMapper().readValue(tokenDecoded.getClaims(), Map.class);		   
+    		//Roles roles = (Roles) new ObjectMapper().readValue(authInfo.get("realm_access"), Roles.class);
+    		verifyClaims(authInfo);
+    	    List<Object> roles =  (List<Object>)(((LinkedHashMap<Object, Object>)authInfo.get("realm_access")).get("roles"));
+    	    LOGGER.info("Get roles ................. "+roles); 
+    		final OpenIdConnectUserDetails user = new OpenIdConnectUserDetails(authInfo.get("sub").toString(),authInfo.get("preferred_username").toString(),createAuthority(roles));     
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            chain.doFilter(req, res);
+        }catch(UnauthorizedClientException ex) {
+        	LOGGER.error(ex.getMessage()); 
+        	res.setStatus(HttpStatus.UNAUTHORIZED.value());
+        }catch(Exception ex) {
+        	LOGGER.error(ex.getMessage());
+        	res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }		       
         
-		Jwt tokenDecoded = JwtHelper.decode(strAccessToken);
-		Map<Object, Object> authInfo = new ObjectMapper().readValue(tokenDecoded.getClaims(), Map.class);		   
-		//Roles roles = (Roles) new ObjectMapper().readValue(authInfo.get("realm_access"), Roles.class);
-		verifyClaims(authInfo);
-	    List<Object> roles =  (List<Object>)(((LinkedHashMap<Object, Object>)authInfo.get("realm_access")).get("roles"));
-	    LOGGER.info("Get roles ................. "+roles); 
-		final OpenIdConnectUserDetails user = new OpenIdConnectUserDetails(authInfo.get("sub").toString(),authInfo.get("preferred_username").toString(),createAuthority(roles));     
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);		       
-        chain.doFilter(req, res);
     }	
     
     private RsaVerifier verifier(String kid){
@@ -106,7 +116,7 @@ public class KeycloakAuthorizationFilter extends BasicAuthenticationFilter{
 	    Date now = new Date();
 	    if (expireDate.before(now) || !claims.get("iss").equals(issuer) || 
 	      !claims.get("aud").equals(clientId)) {
-	        throw new RuntimeException("Invalid claims");
+	        throw new UnauthorizedClientException("Token has expired.");
 	    }
 	} 
 	
