@@ -1,4 +1,4 @@
-package com.movie.security;
+package com.movie.config;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;

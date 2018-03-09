@@ -1,4 +1,4 @@
-package com.movie.domain;
+package com.movie.pojo;
 
 public class Movie {
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.movie.domain.Movie;
+import com.movie.pojo.Movie;
 
 @Service
 public class MovieService {

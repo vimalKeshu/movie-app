@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.movie.domain.Movie;
+import com.movie.pojo.Movie;
 import com.movie.service.MovieService;
 
 @RestController
@@ -23,32 +23,31 @@ public class MovieController {
 	private MovieService movieService;
 	
 	@RequestMapping(method=RequestMethod.GET,value="/list")
-	@PreAuthorize("hasRole('ROLE_USER')")
+	@PreAuthorize("hasRole('ROLE_corvesta-user')")
 	public List<Movie> getAll(){
-		LOGGER.info("...................................inside rest end point..........................");
 		return movieService.getAll();
 	}
 	
 	@RequestMapping(method=RequestMethod.GET,value="/{id}")
-	@PreAuthorize("hasRole('corvesta-user')")
+	@PreAuthorize("hasRole('ROLE_corvesta-user')")
 	public Movie get(@PathVariable long id) {
 		return movieService.find(id);
 	}
 	
 	@RequestMapping(method=RequestMethod.POST,value="/create")
-	@PreAuthorize("hasRole('corvesta-admin')")
+	@PreAuthorize("hasRole('ROLE_corvesta-admin')")
 	public void create(@RequestBody Movie movie) {
 		movieService.add(movie);
 	}
 	
 	@RequestMapping(method=RequestMethod.PUT,value="/update/{id}")
-	@PreAuthorize("hasRole('corvesta-admin')")
+	@PreAuthorize("hasRole('ROLE_corvesta-admin')")
 	public void update(@PathVariable long id,@RequestBody Movie movie) {
 		movieService.update(id, movie);
 	}
 	
 	@RequestMapping(method=RequestMethod.DELETE,value="/delete/{id}")
-	@PreAuthorize("hasRole('corvesta-admin')")
+	@PreAuthorize("hasRole('ROLE_corvesta-admin')")
 	public void delete(@PathVariable long id) {
 		movieService.delete(id);
 	}	

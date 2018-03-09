@@ -1,37 +1,37 @@
-package com.movie.domain;
+package com.movie.pojo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
+import com.movie.controller.MovieController;
+
 public class OpenIdConnectUserDetails implements UserDetails{
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(OpenIdConnectUserDetails.class);
 
 
     private String userId;
     private String username;
-    private OAuth2AccessToken token;
-    private final List<GrantedAuthority> authorities = Arrays.asList(new GrantedAuthority() {
-		
-		@Override
-		public String getAuthority() {
-			// TODO Auto-generated method stub
-			return "ROLE_USER";
-		}
-	});
-
-    public OpenIdConnectUserDetails(Map<String, String> userInfo, OAuth2AccessToken token) {
-        this.userId = userInfo.get("sub");
-        this.username = userInfo.get("preferred_username");
-        this.token = token;
+    private Collection<GrantedAuthority> authorities;
+    
+    public OpenIdConnectUserDetails(String userId,String userName, Collection<GrantedAuthority> roles) {
+        this.userId = userId;
+        this.username = userName;
+        this.authorities = roles;
     }
-
+    
     @Override
     public String getUsername() {
         return username;
@@ -48,14 +48,6 @@ public class OpenIdConnectUserDetails implements UserDetails{
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public OAuth2AccessToken getToken() {
-        return token;
-    }
-
-    public void setToken(OAuth2AccessToken token) {
-        this.token = token;
     }
 
     public void setUsername(String username) {

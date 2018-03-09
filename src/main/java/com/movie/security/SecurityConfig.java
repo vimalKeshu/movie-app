@@ -1,18 +1,14 @@
 package com.movie.security;
 
-import javax.servlet.Filter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 
 @Configuration
@@ -21,42 +17,46 @@ import org.springframework.security.web.context.AbstractSecurityWebApplicationIn
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
     
-	 public SecurityConfig() {
+/*	 public SecurityConfig() {
 	        super(true);
-	    }	
+	    }	*/
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 	
         http
         .csrf()
+/*        .and()
+        .cors()*/
         .disable()      
-        .addFilterAfter(registration().getFilter(), UsernamePasswordAuthenticationFilter.class)
         .authorizeRequests()                       
         .antMatchers("/movie/**")
         .authenticated()
+        .and()
+        .addFilter(getKeycloakAuthorizationFilter())
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         ;
 	}
 	
-    @Bean
+/*    @Bean
     public KeycloakAuthenticationFilter getKeycloakAuthenticationFilter() {
         final KeycloakAuthenticationFilter filter = new KeycloakAuthenticationFilter(); 
         return filter;
-    }
+    }*/
     
-/*    @Bean
-    public KeycloakAuthorizationFilter getKeycloakAuthorizationFilter() {
-        final KeycloakAuthorizationFilter filter = new KeycloakAuthorizationFilter(new NoOpAuthenticationManager());
-        return filter;
-    }  */  
-	
     @Bean
+    public KeycloakAuthorizationFilter getKeycloakAuthorizationFilter() {
+        final KeycloakAuthorizationFilter filter = new KeycloakAuthorizationFilter();
+        return filter;
+    }    
+	
+/*    @Bean
     public FilterRegistrationBean<Filter> registration() {
         FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<Filter>();
         registration.setFilter(getKeycloakAuthenticationFilter());
         registration.setEnabled(false);        
         return registration;
-    }	
+    }	*/
 	
 /*    *//**
      * This repository contains all known client registrations. This is only one-
