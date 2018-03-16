@@ -46,14 +46,17 @@ public class KeycloakAuthorizationFilter extends BasicAuthenticationFilter{
     public static final String DEFAULT_LOGIN_URL = "/sso/login";
     public static final String AUTHORIZATION_HEADER = "Authorization";
     
-    @Value("${keycloak-client.id}")
+    @Value("${clientId}")
     private String clientId;
 
-    @Value("${keycloak.issuer}")
+    @Value("${issuer}")
     private String issuer;
 
-    @Value("${keycloak.jwk}")
+    @Value("${jwk}")
     private String jwkUrl;  
+    
+    @Value("${roles}")
+    private String roles;      
     
 	public KeycloakAuthorizationFilter() {
 		super(new AuthenticationManager() {
@@ -86,9 +89,9 @@ public class KeycloakAuthorizationFilter extends BasicAuthenticationFilter{
     		Map<Object, Object> authInfo = new ObjectMapper().readValue(tokenDecoded.getClaims(), Map.class);		   
     		//Roles roles = (Roles) new ObjectMapper().readValue(authInfo.get("realm_access"), Roles.class);
     		verifyClaims(authInfo);
-    	    List<Object> roles =  (List<Object>)(((LinkedHashMap<Object, Object>)authInfo.get("realm_access")).get("roles"));
+    	    List<Object> roles =  (List<Object>)authInfo.get("groups");
     	    LOGGER.info("Get roles ................. "+roles); 
-    		final OpenIdConnectUserDetails user = new OpenIdConnectUserDetails(authInfo.get("sub").toString(),authInfo.get("preferred_username").toString(),createAuthority(roles));     
+    		final OpenIdConnectUserDetails user = new OpenIdConnectUserDetails(authInfo.get("uid").toString(),authInfo.get("sub").toString(),createAuthority(roles));     
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(req, res);
@@ -115,7 +118,7 @@ public class KeycloakAuthorizationFilter extends BasicAuthenticationFilter{
 	    Date expireDate = new Date(exp * 1000L);
 	    Date now = new Date();
 	    if (expireDate.before(now) || !claims.get("iss").equals(issuer) || 
-	      !claims.get("aud").equals(clientId)) {
+	      !claims.get("cid").equals(clientId)) {
 	        throw new UnauthorizedClientException("Token has expired.");
 	    }
 	} 
