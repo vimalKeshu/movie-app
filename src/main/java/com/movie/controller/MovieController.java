@@ -22,32 +22,27 @@ public class MovieController {
 	@Autowired
 	private MovieService movieService;
 	
-	@RequestMapping(method=RequestMethod.GET,value="/list")
-	@PreAuthorize("hasRole('corvesta-user')")
+	@RequestMapping(method=RequestMethod.GET)
 	public List<Movie> getAll(){
 		return movieService.getAll();
 	}
 	
 	@RequestMapping(method=RequestMethod.GET,value="/{id}")
-	@PreAuthorize("hasRole('corvesta-user')")
 	public Movie get(@PathVariable long id) {
 		return movieService.find(id);
 	}
 	
-	@RequestMapping(method=RequestMethod.POST,value="/create")
-	@PreAuthorize("hasRole('corvesta-admin')")
+	@RequestMapping(method=RequestMethod.POST)
 	public void create(@RequestBody Movie movie) {
 		movieService.add(movie);
 	}
 	
-	@RequestMapping(method=RequestMethod.PUT,value="/update/{id}")
-	@PreAuthorize("hasRole('corvesta-admin')")
+	@RequestMapping(method=RequestMethod.PUT,value="/{id}")
 	public void update(@PathVariable long id,@RequestBody Movie movie) {
 		movieService.update(id, movie);
 	}
 	
-	@RequestMapping(method=RequestMethod.DELETE,value="/delete/{id}")
-	@PreAuthorize("hasRole('corvesta-admin')")
+	@RequestMapping(method=RequestMethod.DELETE,value="/{id}")
 	public void delete(@PathVariable long id) {
 		movieService.delete(id);
 	}	

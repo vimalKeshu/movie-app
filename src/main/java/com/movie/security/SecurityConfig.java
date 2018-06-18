@@ -63,6 +63,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter{
       http	
       		.csrf()
       		.disable()
+/*      		.x509()
+      		.and()*/
       		.authorizeRequests() 
             .antMatchers("/movie/**").authenticated();
    }	
@@ -74,6 +76,5 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter{
        registrationBean.setEnabled(false);
        return registrationBean;
    }   
-	
-	
+   	
 }
