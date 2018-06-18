@@ -1,7 +1,6 @@
 package com.movie.security;
 
-import javax.servlet.http.HttpServletResponse;
-
+import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
@@ -42,8 +41,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter{
     * @return
     */
    @Bean
-   public KeycloakSpringBootConfigResolver KeycloakConfigResolver() {
-      return new KeycloakSpringBootConfigResolver();
+   public KeycloakConfigResolver KeycloakConfigResolver() {
+      return new MultitenantConfigResolver();
    }   
    
    /**
