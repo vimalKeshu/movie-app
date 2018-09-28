@@ -26,28 +26,34 @@
  		<groupId>org.springframework.boot</groupId>
  		<artifactId>spring-boot-starter-web</artifactId>
  	</dependency>
- 	
+
 	<dependency>
 	    <groupId>org.springframework.boot</groupId>
 	    <artifactId>spring-boot-starter-security</artifactId>
-	</dependency> 	
+	</dependency>
  	
  	<dependency>
  		<groupId>org.springframework.boot</groupId>
  		<artifactId>spring-boot-starter-logging</artifactId>
- 	</dependency> 	
+ 	</dependency>
  	
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    
+
 	<dependency>
 	    <groupId>org.keycloak</groupId>
 	    <artifactId>keycloak-spring-boot-2-starter</artifactId>
 	    <version>4.0.0.Beta2</version>
-	</dependency>    
+	</dependency>
+
+      <dependency>
+          <groupId>com.corvesta.keyspring.activitylog.client.activityLogClient</groupId>
+          <artifactId>activityLogClient</artifactId>
+          <version>1.0.0</version>
+      </dependency>
   </dependencies>
   <build>
   	<plugins>
