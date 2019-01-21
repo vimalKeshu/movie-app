@@ -27,7 +27,8 @@ public class MultitenantConfiguration extends KeycloakAutoConfiguration {
 	public void setKeycloakSpringBootProperties(final KeycloakSpringBootProperties keycloakProperties) {
 		m_keycloakProperties = keycloakProperties;
 		super.setKeycloakSpringBootProperties(keycloakProperties);
-		MultitenantConfigResolver.setAdapterConfig(keycloakProperties);	}
+		//MultitenantConfigResolver.setAdapterConfig(keycloakProperties);
+	}
 
 	@Bean
 	@ConditionalOnClass(name = { "org.apache.catalina.startup.Tomcat" })

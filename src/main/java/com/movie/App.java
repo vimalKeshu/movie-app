@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @ImportAutoConfiguration(MultitenantConfiguration.class)
-//@EnableAutoConfiguration
 public class App 
 {
     public static void main( String[] args ) throws Exception
